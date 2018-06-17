@@ -1,0 +1,61 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<form id="convert-form">
+    <h3>Celsius</h3>
+    <input type="text" name="celsius">
+    <h3>Fahrenheit</h3>
+    <input type="text" name="fahrenheit">
+    <br>
+    <br>
+    <input type="button" name="hello" value="Convert">
+</form>
+
+<script>
+    // Pass value from last used box to the API and display the return value in the other box
+    let lastUsedBox = null;
+
+    document.getElementsByName("celsius")[0].addEventListener('input', setLastUsedBox);
+    document.getElementsByName("fahrenheit")[0].addEventListener('input', setLastUsedBox);
+    document.getElementsByName("hello")[0].addEventListener('click', async (e) => {
+        await updateInputBox(lastUsedBox);
+    });
+
+    function setLastUsedBox(e) {
+        lastUsedBox = e.target;
+    }
+
+    async function submit(inputValue, apiTarget) {
+        let url = "http://localhost:5000/api/temperature/" + apiTarget;
+        
+        return fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: inputValue
+        }).then(res => res.json());
+    }
+
+    async function updateInputBox(lastUsedBox) {
+        if(lastUsedBox === null || lastUsedBox.value === "") {
+            return;
+        }
+
+        let response = null;
+        switch (lastUsedBox.name) {
+            case "celsius":
+                response = await submit(lastUsedBox.value, "ctof");
+                document.getElementsByName("fahrenheit")[0].value = response;
+                break;
+            case "fahrenheit":
+                response = await submit(lastUsedBox.value, "ftoc");
+                document.getElementsByName("celsius")[0].value = response;
+                break;
+            default:
+                return;
+                break;
+        }
+    }
+</script>
